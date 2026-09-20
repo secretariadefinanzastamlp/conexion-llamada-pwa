@@ -1,406 +1,669 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conexión de Llamada</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    :root {
-      --bg-color: #f2f2f7;
-      --card-bg: #ffffff;
-      --primary-color: #34c759;
-      --danger-color: #ff3b30;
-      --text-color: #000000;
-      --subtext-color: #8e8e93;
-      --accent-blue: #007aff;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Conexión de llamada</title>
+    <link rel="manifest" href="manifest.json" />
+    <style>
+      :root {
+        --bg: #f3f6fb;
+        --card: rgba(255, 255, 255, 0.92);
+        --card-strong: #ffffff;
+        --primary: #0ea5e9;
+        --primary-strong: #0284c7;
+        --secondary: #14b8a6;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --text: #0f172a;
+        --muted: #64748b;
+        --line: rgba(148, 163, 184, 0.24);
+        --shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+      }
 
-    * { box-sizing: border-box; }
+      * { box-sizing: border-box; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(14, 165, 233, 0.15), transparent 30%),
+          radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.14), transparent 30%),
+          var(--bg);
+        color: var(--text);
+      }
 
-    .contenedor {
-      width: 100%;
-      max-width: 420px;
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
 
-    .encabezado { text-align: center; margin-bottom: 20px; }
-    .estado {
-      font-size: 13px;
-      color: var(--subtext-color);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-    }
-    .icono { font-size: 48px; margin: 10px 0; }
-    .titulo { font-size: 20px; font-weight: 700; margin: 4px 0; }
-    .detalle { font-size: 14px; color: var(--subtext-color); }
+      .app {
+        width: min(100%, 430px);
+        border-radius: 28px;
+        background: var(--card);
+        backdrop-filter: blur(18px);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255,255,255,0.5);
+        overflow: hidden;
+      }
 
-    .dispositivos-lista {
-      margin: 15px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px 8px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
 
-    .dispositivo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      border: 1.5px solid #e5e5ea;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+      .online {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, 0.12);
+        color: #15803d;
+        font-weight: 700;
+      }
 
-    .dispositivo.seleccionado {
-      border-color: var(--accent-blue);
-      background-color: #f0f7ff;
-    }
+      .online::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16);
+      }
 
-    .dispositivo-info {
-      display: flex;
-      flex-direction: column;
-    }
+      .header {
+        text-align: center;
+        padding: 8px 20px 18px;
+      }
 
-    .dispositivo-nombre { font-weight: 600; font-size: 15px; }
-    .dispositivo-estado { font-size: 12px; color: var(--subtext-color); }
+      .status-icon {
+        width: 74px;
+        height: 74px;
+        margin: 8px auto 10px;
+        display: grid;
+        place-items: center;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(14,165,233,0.14), rgba(20,184,166,0.12));
+        font-size: 34px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+      }
 
-    .campo-numero { margin: 15px 0; }
-    .campo-numero label {
-      display: block;
-      font-size: 12px;
-      color: var(--subtext-color);
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-    .input-wrapper { display: flex; gap: 8px; }
-    .campo-numero input {
-      flex: 1;
-      padding: 12px 16px;
-      font-size: 22px;
-      font-weight: bold;
-      border: 1.5px solid #d1d1d6;
-      border-radius: 12px;
-      outline: none;
-      letter-spacing: 1px;
-      text-align: center;
-      background-color: #fafafa;
-    }
-    .btn-borrar {
-      padding: 0 16px;
-      background-color: #e5e5ea;
-      border: none;
-      border-radius: 12px;
-      font-size: 20px;
-      cursor: pointer;
-    }
+      .status-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        font-weight: 700;
+      }
 
-    .teclado-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+      .status-title {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 8px 0 6px;
+      }
 
-    .tecla {
-      background-color: #f2f2f7;
-      border: none;
-      border-radius: 16px;
-      padding: 14px 0;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--text-color);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-    .tecla:active { background-color: #d1d1d6; }
-    .tecla .subtexto {
-      font-size: 9px;
-      color: var(--subtext-color);
-      font-weight: 500;
-      margin-top: 2px;
-    }
+      .status-text {
+        font-size: 14px;
+        color: var(--muted);
+      }
 
-    .acciones {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+      .devices {
+        padding: 0 18px 10px;
+      }
 
-    .btn {
-      flex: 1;
-      padding: 16px;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+      .device-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-    .btn-conectar { background-color: var(--primary-color); color: white; }
-    .btn-cancelar { background-color: #e5e5ea; color: var(--text-color); }
+      .device {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.6);
+        border-radius: 16px;
+        padding: 12px 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
 
-    .historial-seccion {
-      border-top: 1px solid #e5e5ea;
-      padding-top: 16px;
-    }
+      .device:hover { transform: translateY(-1px); }
+      .device.selected {
+        border-color: rgba(14,165,233,0.45);
+        background: rgba(14,165,233,0.07);
+        box-shadow: 0 0 0 3px rgba(14,165,233,0.08);
+      }
 
-    .historial-seccion h3 {
-      font-size: 15px;
-      margin: 0 0 12px 0;
-      font-weight: 600;
-    }
+      .device.disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
 
-    .lista-historial {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 140px;
-      overflow-y: auto;
-    }
+      .device-name {
+        font-weight: 700;
+        font-size: 15px;
+      }
 
-    .historial-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 12px;
-      border-bottom: 1px solid #f2f2f7;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+      .device-meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
 
-    .btn-limpiar {
-      margin-top: 12px;
-      background: none;
-      border: none;
-      color: var(--danger-color);
-      font-size: 12px;
-      cursor: pointer;
-      padding: 0;
-      font-weight: 600;
-    }
-  </style>
-</head>
-<body>
-<div class="contenedor" id="ventana">
-  <div class="encabezado">
-    <div class="estado" id="estado">Esperando...</div>
-    <div class="icono" id="icono">📞</div>
-    <div class="titulo" id="titulo">Listo para conectar</div>
-    <div class="detalle" id="detalle">Selecciona un dispositivo y contesta</div>
-  </div>
+      .device-icon {
+        font-size: 22px;
+      }
 
-  <div class="dispositivos-lista">
-    <div class="dispositivo seleccionado" onclick="seleccionar(this)">
-      <div class="dispositivo-info">
-        <span class="dispositivo-nombre">iPhone Principal</span>
-        <span class="dispositivo-estado">Disponible • Bluetooth</span>
+      .dialer {
+        padding: 12px 18px 0;
+      }
+
+      .field {
+        background: rgba(148,163,184,0.04);
+        border: 1px solid rgba(148,163,184,0.2);
+        border-radius: 18px;
+        padding: 12px 14px;
+      }
+
+      .field-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      .input-wrap {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      input[type="tel"] {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--text);
+        font-size: clamp(22px, 4vw, 28px);
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+
+      .erase-btn {
+        width: 46px;
+        height: 46px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(148,163,184,0.12);
+        color: var(--text);
+        font-size: 24px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .shortcuts {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+      }
+      .shortcuts::-webkit-scrollbar { display: none; }
+
+      .chip {
+        flex: 0 0 auto;
+        background: rgba(14,165,233,0.08);
+        color: var(--primary-strong);
+        border: 1px solid rgba(14,165,233,0.12);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        padding: 18px 18px 0;
+      }
+
+      .key {
+        border: none;
+        border-radius: 18px;
+        height: 64px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(241,245,249,1));
+        color: var(--text);
+        font-size: 32px;
+        font-weight: 800;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 12px rgba(15,23,42,0.04);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .key:active {
+        transform: translateY(1px);
+      }
+
+      .key small {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 10px;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        padding: 18px;
+      }
+
+      .btn {
+        flex: 1;
+        border: none;
+        border-radius: 16px;
+        padding: 16px 12px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .btn.secondary {
+        background: rgba(148,163,184,0.12);
+        color: var(--text);
+      }
+
+      .btn.primary {
+        background: linear-gradient(135deg, var(--success), #16a34a);
+        color: white;
+        box-shadow: 0 12px 22px rgba(22, 163, 74, 0.28);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .history {
+        padding: 0 18px 18px;
+      }
+
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .history-title {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .clear-btn {
+        border: none;
+        background: transparent;
+        color: var(--danger);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .history-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .history-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: rgba(148,163,184,0.05);
+        border: 1px solid rgba(148,163,184,0.12);
+        border-radius: 12px;
+        padding: 10px 12px;
+        cursor: pointer;
+      }
+
+      .history-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .history-main strong {
+        display: block;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .history-time {
+        display: block;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .empty {
+        padding: 10px 8px;
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 380px) {
+        .app { border-radius: 20px; }
+        .status-title { font-size: 24px; }
+        .key { height: 58px; font-size: 28px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app" aria-label="Aplicación de llamadas">
+      <div class="topbar">
+        <span>Conexión</span>
+        <span class="online">En línea</span>
       </div>
-      <span>📲</span>
-    </div>
-    <div class="dispositivo" onclick="seleccionar(this)">
-      <div class="dispositivo-info">
-        <span class="dispositivo-nombre">Celular Secundario</span>
-        <span class="dispositivo-estado">Disponible • Red Wi‑Fi</span>
+
+      <header class="header">
+        <div class="status-icon" id="statusIcon">📞</div>
+        <div class="status-label" id="statusLabel">Listo</div>
+        <div class="status-title" id="statusTitle">Llamar</div>
+        <div class="status-text" id="statusText">Selecciona un dispositivo y marca el número</div>
+      </header>
+
+      <section class="devices" aria-label="Dispositivos disponibles">
+        <div class="device-list">
+          <button class="device selected" type="button" data-device="iphone-principal">
+            <div>
+              <div class="device-name">iPhone Principal</div>
+              <div class="device-meta">Bluetooth • Disponible</div>
+            </div>
+            <span class="device-icon">📱</span>
+          </button>
+
+          <button class="device" type="button" data-device="celular-secundario">
+            <div>
+              <div class="device-name">Celular Secundario</div>
+              <div class="device-meta">Wi‑Fi • Disponible</div>
+            </div>
+            <span class="device-icon">📶</span>
+          </button>
+
+          <button class="device disabled" type="button" data-device="otro-dispositivo" disabled>
+            <div>
+              <div class="device-name">Otro Dispositivo</div>
+              <div class="device-meta">Fuera de alcance</div>
+            </div>
+            <span class="device-icon">❌</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="dialer" aria-label="Marcación">
+        <div class="field">
+          <label class="field-label" for="numero">Número</label>
+          <div class="input-wrap">
+            <input id="numero" type="tel" value="+521234567890" inputmode="tel" aria-label="Número telefónico" />
+            <button class="erase-btn" type="button" id="borrar" aria-label="Borrar último dígito">⌫</button>
+          </div>
+        </div>
+
+        <div class="shortcuts" id="shortcuts" aria-label="Contactos rápidos"></div>
+      </section>
+
+      <section class="keypad" aria-label="Teclado">
+        <button class="key" type="button" data-value="1">1<small></small></button>
+        <button class="key" type="button" data-value="2">2<small>ABC</small></button>
+        <button class="key" type="button" data-value="3">3<small>DEF</small></button>
+        <button class="key" type="button" data-value="4">4<small>GHI</small></button>
+        <button class="key" type="button" data-value="5">5<small>JKL</small></button>
+        <button class="key" type="button" data-value="6">6<small>MNO</small></button>
+        <button class="key" type="button" data-value="7">7<small>PQRS</small></button>
+        <button class="key" type="button" data-value="8">8<small>TUV</small></button>
+        <button class="key" type="button" data-value="9">9<small>WXYZ</small></button>
+        <button class="key" type="button" data-value="*">*<small></small></button>
+        <button class="key" type="button" data-value="0">0<small>+</small></button>
+        <button class="key" type="button" data-value="#">#<small></small></button>
+      </section>
+
+      <div class="actions">
+        <button class="btn secondary" type="button" id="cancelar">Cancelar</button>
+        <button class="btn primary" type="button" id="llamar">Llamar</button>
       </div>
-      <span>📶</span>
-    </div>
-    <div class="dispositivo" onclick="seleccionar(this)" style="opacity: 0.6;">
-      <div class="dispositivo-info">
-        <span class="dispositivo-nombre">Otro Dispositivo</span>
-        <span class="dispositivo-estado">Fuera de alcance</span>
-      </div>
-      <span>❌</span>
-    </div>
-  </div>
 
-  <div class="campo-numero">
-    <label for="numeroTel">Número a llamar:</label>
-    <div class="input-wrapper">
-      <input type="tel" id="numeroTel" placeholder="+1234567890" value="+1234567890">
-      <button class="btn-borrar" onclick="borrarDigito()" title="Borrar">⌫</button>
-    </div>
-  </div>
+      <section class="history" aria-label="Historial reciente">
+        <div class="history-header">
+          <div class="history-title">Historial</div>
+          <button class="clear-btn" type="button" id="clearHistory">Borrar</button>
+        </div>
+        <ul class="history-list" id="historyList"></ul>
+      </section>
+    </main>
 
-  <div class="teclado-grid">
-    <button class="tecla" onclick="agregarDigito('1')">1<span class="subtexto">&nbsp;</span></button>
-    <button class="tecla" onclick="agregarDigito('2')">2<span class="subtexto">ABC</span></button>
-    <button class="tecla" onclick="agregarDigito('3')">3<span class="subtexto">DEF</span></button>
-    <button class="tecla" onclick="agregarDigito('4')">4<span class="subtexto">GHI</span></button>
-    <button class="tecla" onclick="agregarDigito('5')">5<span class="subtexto">JKL</span></button>
-    <button class="tecla" onclick="agregarDigito('6')">6<span class="subtexto">MNO</span></button>
-    <button class="tecla" onclick="agregarDigito('7')">7<span class="subtexto">PQRS</span></button>
-    <button class="tecla" onclick="agregarDigito('8')">8<span class="subtexto">TUV</span></button>
-    <button class="tecla" onclick="agregarDigito('9')">9<span class="subtexto">WXYZ</span></button>
-    <button class="tecla" onclick="agregarDigito('*')">*<span class="subtexto">&nbsp;</span></button>
-    <button class="tecla" onclick="agregarDigito('0')" oncontextmenu="agregarDigito('+'); return false;">0<span class="subtexto">+</span></button>
-    <button class="tecla" onclick="agregarDigito('#')">#<span class="subtexto">&nbsp;</span></button>
-  </div>
+    <script>
+      const STORAGE_KEY = 'llamada_historial_v2';
+      const shortcutsData = [
+        { label: 'Sofía', value: '+521234567890' },
+        { label: 'Servicio', value: '+525551234567' },
+        { label: 'Emergencia', value: '911' }
+      ];
 
-  <div class="acciones">
-    <button class="btn btn-cancelar" onclick="cancelar()">Cancelar</button>
-    <button class="btn btn-conectar" id="btnConectar" onclick="conectar()">Conectar</button>
-  </div>
+      const input = document.getElementById('numero');
+      const statusIcon = document.getElementById('statusIcon');
+      const statusLabel = document.getElementById('statusLabel');
+      const statusTitle = document.getElementById('statusTitle');
+      const statusText = document.getElementById('statusText');
+      const shortcuts = document.getElementById('shortcuts');
+      const historyList = document.getElementById('historyList');
+      const callButton = document.getElementById('llamar');
+      const cancelButton = document.getElementById('cancelar');
 
-  <div class="historial-seccion">
-    <h3>Historial de llamadas</h3>
-    <ul class="lista-historial" id="listaHistorial"></ul>
-    <button class="btn-limpiar" onclick="limpiarHistorial()">Borrar historial</button>
-  </div>
-</div>
+      function vibrate(pattern = 30) {
+        if ('vibrate' in navigator) navigator.vibrate(pattern);
+      }
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW:', err));
-    });
-  }
+      function normalizePhone(value) {
+        return String(value || '').replace(/\s+/g, '').trim();
+      }
 
-  const estado = document.getElementById('estado');
-  const icono = document.getElementById('icono');
-  const titulo = document.getElementById('titulo');
-  const detalle = document.getElementById('detalle');
-  const btnConectar = document.getElementById('btnConectar');
+      function setStatus(icon, label, title, text) {
+        statusIcon.textContent = icon;
+        statusLabel.textContent = label;
+        statusTitle.textContent = title;
+        statusText.textContent = text;
+      }
 
-  function seleccionar(el) {
-    document.querySelectorAll('.dispositivo').forEach(d => d.classList.remove('seleccionado'));
-    el.classList.add('seleccionado');
-  }
+      function renderShortcuts() {
+        shortcuts.innerHTML = shortcutsData.map(item => `
+          <button class="chip" type="button" data-number="${item.value}">${item.label}</button>
+        `).join('');
 
-  function vibrar() {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(30);
-    }
-  }
+        shortcuts.querySelectorAll('.chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+            input.value = normalizePhone(btn.dataset.number);
+            vibrate();
+          });
+        });
+      }
 
-  function agregarDigito(digito) {
-    vibrar();
-    const input = document.getElementById('numeroTel');
-    if (input) input.value += digito;
-  }
+      function getHistory() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch {
+          return [];
+        }
+      }
 
-  function borrarDigito() {
-    vibrar();
-    const input = document.getElementById('numeroTel');
-    if (input && input.value.length > 0) {
-      input.value = input.value.slice(0, -1);
-    }
-  }
+      function saveHistory(items) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      }
 
-  function conectar() {
-    const numeroInput = document.getElementById('numeroTel');
-    const numero = numeroInput ? numeroInput.value.trim() : '';
+      function renderHistory() {
+        const items = getHistory();
 
-    if (!numero) {
-      alert('Ingresa un número telefónico válido.');
-      return;
-    }
+        if (!items.length) {
+          historyList.innerHTML = '<li class="empty">Sin llamadas recientes</li>';
+          return;
+        }
 
-    estado.textContent = 'Conectando...';
-    icono.textContent = '⏳';
-    titulo.textContent = 'Estableciendo conexión';
-    detalle.textContent = 'Por favor, espera un momento';
+        historyList.innerHTML = items.map(item => `
+          <li class="history-item" data-number="${item.number}">
+            <div class="history-main">
+              <span>📞</span>
+              <div>
+                <strong>${item.number}</strong>
+                <span class="history-time">${item.time}</span>
+              </div>
+            </div>
+            <span>📲</span>
+          </li>
+        `).join('');
 
-    btnConectar.textContent = 'Conectando...';
-    btnConectar.disabled = true;
+        historyList.querySelectorAll('.history-item').forEach(item => {
+          item.addEventListener('click', () => {
+            input.value = normalizePhone(item.dataset.number);
+            vibrate();
+          });
+        });
+      }
 
-    guardarEnHistorial(numero);
+      function addToHistory(number) {
+        const list = getHistory();
+        const clean = normalizePhone(number);
+        if (!clean) return;
 
-    setTimeout(() => {
-      estado.textContent = 'Conectado ✓';
-      icono.textContent = '✅';
-      titulo.textContent = 'Llamada activa';
-      detalle.textContent = 'Conexión establecida correctamente';
-      btnConectar.textContent = 'Conectado';
+        const entry = {
+          number: clean,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
 
-      setTimeout(() => {
-        window.location.href = `tel:${numero}`;
-      }, 500);
-    }, 2000);
-  }
+        saveHistory([entry, ...list.filter(item => item.number !== clean)].slice(0, 8));
+        renderHistory();
+      }
 
-  function reLlamar(numero) {
-    const input = document.getElementById('numeroTel');
-    if (input) input.value = numero;
-    conectar();
-  }
+      function handleNumberInput(value) {
+        input.value = normalizePhone(value);
+      }
 
-  function cancelar() {
-    if (confirm('¿Deseas cancelar la operación?')) {
-      estado.textContent = 'Esperando...';
-      icono.textContent = '📞';
-      titulo.textContent = 'Listo para conectar';
-      detalle.textContent = 'Selecciona un dispositivo y contesta';
-      btnConectar.textContent = 'Conectar';
-      btnConectar.disabled = false;
-    }
-  }
+      function addDigit(digit) {
+        const current = normalizePhone(input.value) + digit;
+        input.value = current;
+        vibrate();
+      }
 
-  function guardarEnHistorial(numero) {
-    const llamadas = JSON.parse(localStorage.getItem('historial_android')) || [];
-    const nuevaLlamada = {
-      numero: numero,
-      fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+      function eraseDigit() {
+        const current = normalizePhone(input.value);
+        input.value = current.slice(0, -1);
+        vibrate();
+      }
 
-    llamadas.unshift(nuevaLlamada);
-    localStorage.setItem('historial_android', JSON.stringify(llamadas));
-    renderizarHistorial();
-  }
+      function selectDevice(target) {
+        document.querySelectorAll('.device').forEach(btn => btn.classList.remove('selected'));
+        target.classList.add('selected');
+      }
 
-  function renderizarHistorial() {
-    const lista = document.getElementById('listaHistorial');
-    if (!lista) return;
+      document.querySelectorAll('.device').forEach(btn => {
+        if (!btn.disabled) {
+          btn.addEventListener('click', () => selectDevice(btn));
+        }
+      });
 
-    const llamadas = JSON.parse(localStorage.getItem('historial_android')) || [];
-    lista.innerHTML = '';
+      document.querySelectorAll('.key').forEach(btn => {
+        btn.addEventListener('click', () => addDigit(btn.dataset.value));
+      });
 
-    if (llamadas.length === 0) {
-      lista.innerHTML = '<li style="font-size:12px; color:#8e8e93; padding:5px 0;">Sin llamadas recientes</li>';
-      return;
-    }
+      document.getElementById('borrar').addEventListener('click', eraseDigit);
 
-    llamadas.forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'historial-item';
-      li.onclick = () => reLlamar(item.numero);
+      cancelButton.addEventListener('click', () => {
+        setStatus('📞', 'Listo', 'Llamar', 'Selecciona un dispositivo y marca el número');
+        callButton.disabled = false;
+        callButton.textContent = 'Llamar';
+      });
 
-      li.innerHTML = `
-        <span>📞 <strong>${item.numero}</strong> — <small style="color:#8e8e93;">${item.fecha}</small></span>
-        <span title="Volver a llamar">📲</span>
-      `;
-      lista.appendChild(li);
-    });
-  }
+      callButton.addEventListener('click', () => {
+        const number = normalizePhone(input.value);
 
-  function limpiarHistorial() {
-    localStorage.removeItem('historial_android');
-    renderizarHistorial();
-  }
+        if (!number) {
+          alert('Ingresa un número válido antes de llamar.');
+          return;
+        }
 
-  document.addEventListener('DOMContentLoaded', renderizarHistorial);
-</script>
-</body>
+        setStatus('⏳', 'Conectando', 'Marcando', 'Abriendo el marcador telefónico...');
+        callButton.disabled = true;
+        callButton.textContent = 'Marcando...';
+        addToHistory(number);
+
+        setTimeout(() => {
+          setStatus('✅', 'Conectado', 'Llamando', 'La llamada se está iniciando en tu dispositivo');
+          callButton.textContent = 'Llamando';
+
+          const telLink = `tel:${number}`;
+          window.location.href = telLink;
+
+          setTimeout(() => {
+            callButton.disabled = false;
+            callButton.textContent = 'Llamar';
+          }, 1800);
+        }, 1200);
+      });
+
+      document.getElementById('clearHistory').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        renderHistory();
+      });
+
+      input.addEventListener('input', () => {
+        input.value = normalizePhone(input.value);
+      });
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+      }
+
+      renderShortcuts();
+      renderHistory();
+      setStatus('📞', 'Listo', 'Llamar', 'Selecciona un dispositivo y marca el número');
+    </script>
+  </body>
 </html>

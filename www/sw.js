@@ -1,38 +1,26 @@
-const CACHE_NAME = 'app-llamada-v1';
-const RECURSOS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/sw.js'
-];
+const CACHE_NAME = 'llamada-v2';
+const APP_SHELL = ['/', '/index.html', '/manifest.json', '/sw.js'];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(RECURSOS))
-      .then(() => self.skipWaiting())
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(lista => {
-      return Promise.all(
-        lista.filter(nombreCache => nombreCache !== CACHE_NAME)
-             .map(cache => caches.delete(cache))
-      );
-    }).then(() => self.clients.claim())
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(
+      keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', e => {
-  if (!e.request.url.startsWith('http')) return;
+self.addEventListener('fetch', (event) => {
+  if (!event.request.url.startsWith('http')) return;
 
-  e.respondWith(
-    caches.match(e.request).then(res => {
-      return res || fetch(e.request).catch(() => {
-        return caches.match('/index.html');
-      });
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).catch(() => caches.match('/index.html'));
     })
   );
 });

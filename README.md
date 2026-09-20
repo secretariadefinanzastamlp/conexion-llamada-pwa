@@ -1,53 +1,46 @@
-# Conexión de Llamada APK
+# Conexión de llamada
 
-Este proyecto convierte la PWA de llamadas en una aplicación Android instalada usando Capacitor.
-
-## Estructura
-
-- `www/` contiene la aplicación web
-- `capacitor.config.json` configura Capacitor
-- `package.json` incluye dependencias y scripts
+Aplicación web progresiva (PWA) para llamar desde un celular usando `tel:` y mantener historial local.
 
 ## Requisitos
 
 - Node.js 18+
 - npm
-- Android Studio con SDK de Android
+- Android Studio (para generar el APK)
 
-## Instalación
+## Ejecutar localmente
+
+```bash
+python3 -m http.server 8000
+```
+
+Luego abre:
+
+```text
+http://localhost:8000
+```
+
+## Convertir a Android con Capacitor
 
 ```bash
 npm install
-```
-
-## Generar proyecto Android
-
-```bash
 npx cap add android
+npx cap sync
+npx cap open android
 ```
 
-## Sincronizar cambios web con Android
+En Android Studio compila el APK desde:
 
-```bash
-npm run android:sync
+```text
+Build > Build Bundle(s) / APK(s) > Build APK
 ```
 
-## Abrir Android Studio
+## Funcionalidad real
 
-```bash
-npm run android:open
+La aplicación realiza la llamada con:
+
+```javascript
+window.location.href = `tel:${number}`;
 ```
 
-## Generar APK
-
-Dentro de Android Studio:
-
-1. Abre el proyecto generado en `android/`
-2. Selecciona `Build > Build Bundle(s) / APK(s) > Build APK`
-3. El APK se generará en `android/app/build/outputs/apk/debug/`
-
-## Nota importante
-
-La app usa `window.location.href = 'tel:${numero}'` para abrir el marcador telefónico. Esto funciona en dispositivos móviles reales y en Android cuando la app está instalada.
-
-La PWA se instala como app nativa con Capacitor y puede agregarse a la pantalla de inicio o compilarse a APK.
+Esto funciona correctamente en dispositivos móviles reales, especialmente cuando la app está instalada como aplicación Android.
