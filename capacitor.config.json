@@ -1,0 +1,9 @@
+{
+  "appId": "com.secretariadefinanzastamlp.conexionllamada",
+  "appName": "Conexión Llamada",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
